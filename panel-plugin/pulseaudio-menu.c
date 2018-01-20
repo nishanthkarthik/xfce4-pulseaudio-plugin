@@ -143,6 +143,8 @@ pulseaudio_menu_output_range_scroll (GtkWidget        *widget,
   scroll_event = (GdkEventScroll*)event;
 
   new_volume = volume + (1.0 - 2.0 * scroll_event->direction) * volume_step;
+  if (pulseaudio_config_get_limit_maxvolume (menu->config))
+    new_volume = MIN(new_volume, 1.0);
   pulseaudio_volume_set_volume (menu->volume, new_volume);
 }
 
@@ -157,6 +159,8 @@ pulseaudio_menu_output_range_value_changed (PulseaudioMenu   *menu,
   g_return_if_fail (IS_PULSEAUDIO_MENU (menu));
 
   new_volume = scale_menu_item_get_value (SCALE_MENU_ITEM (menu->output_scale)) / 100.0;
+  if (pulseaudio_config_get_limit_maxvolume (menu->config))
+    new_volume = MIN(new_volume, 1.0);
   pulseaudio_volume_set_volume (menu->volume, new_volume);
 }
 
@@ -214,6 +218,8 @@ pulseaudio_menu_input_range_scroll (GtkWidget        *widget,
   scroll_event = (GdkEventScroll*)event;
 
   new_volume_mic = volume_mic + (1.0 - 2.0 * scroll_event->direction) * volume_step;
+  if (pulseaudio_config_get_limit_maxvolume (menu->config))
+    new_volume_mic = MIN(new_volume_mic, 1.0);
   pulseaudio_volume_set_volume_mic (menu->volume, new_volume_mic);
 }
 
@@ -228,6 +234,8 @@ pulseaudio_menu_input_range_value_changed (PulseaudioMenu   *menu,
   g_return_if_fail (IS_PULSEAUDIO_MENU (menu));
 
   new_volume_mic = scale_menu_item_get_value (SCALE_MENU_ITEM (menu->input_scale)) / 100.0;
+  if (pulseaudio_config_get_limit_maxvolume (menu->config))
+    new_volume_mic = MIN(new_volume_mic, 1.0);
   pulseaudio_volume_set_volume_mic (menu->volume, new_volume_mic);
 }
 
@@ -479,6 +487,8 @@ pulseaudio_menu_new (PulseaudioVolume *volume,
                               G_CALLBACK (pulseaudio_menu_volume_changed), menu);
 
   volume_max = pulseaudio_config_get_volume_max (menu->config);
+  if (pulseaudio_config_get_limit_maxvolume (menu->config))
+    volume_max = MIN (volume_max, 100);
 
   /* Output Devices */
   sources = pulseaudio_volume_get_output_list (menu->volume);
